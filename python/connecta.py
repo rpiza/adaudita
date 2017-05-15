@@ -8,7 +8,7 @@ class ConnectaAD():
     'Represents '
 
     c = None
-    def __init__(self, host='dc1.problemeszero.com', port=389, u='PZERO\\admin', pwd='Password1'):
+    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r'):
         #this is the constructor that takes in host and port. retryAttempts is given 
         # a default value but can also be fed in.
         self.host = host
@@ -28,16 +28,15 @@ class ConnectaAD():
         #print (self.c)
 
     def get_ldap_info(self,filtre):
-        print (filtre)
-        #self.c.search(
-        #    search_base=filtre[0],
-        #    search_filter= filtre[1],
-        #    search_scope=filtre[2],
+        self.c.search(
+            search_base=filtre[0],
+            search_filter= filtre[1],
+            search_scope=filtre[2],
             #attributes=ALL_ATTRIBUTES,  #retorna tots els attr de cada objecte
-        #    attributes=filtre[3], #nomes retorna aquests attr.
-        #    get_operational_attributes=filtre[4])
+            attributes=filtre[3], #nomes retorna aquests attr.
+            get_operational_attributes=filtre[4])
 
     def disconnect(self):
-        pass
+        self.c.unbind()
 
 
