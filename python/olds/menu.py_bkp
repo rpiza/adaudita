@@ -1,11 +1,11 @@
-import sys
+#import sys
 import connecta
+from menu2 import Menu
 from collections import namedtuple
-from funcions import print_results
-
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya")
 dc = Dades_DC("Test", 'dc1.problemeszero.com', 389, 'PZERO\\admin', 'Password1')
+
 
 reports = {
 "all_users": ('DC=problemeszero,DC=com','(&(samAccountName=*)(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','memberOf','accountExpires','altSecurityIdentities','badPasswordTime', 'codePage','countryCode', 'homeDirectory','homeDrive','lastLogoff','lastLogon','lmPwdHistory','logonCount','mail','maxStorage',
@@ -17,7 +17,7 @@ reports = {
 }
 
 
-class Menu:
+class OLD_Menu_old:
     '''Display a menu and respond to choices when run.'''
     def __init__(self):
         self.adObj = connecta.ConnectaAD(dc.host,dc.port,dc.usuari,dc.contrasenya)
@@ -61,7 +61,6 @@ class Menu:
 
     def run(self,a,b):
         '''Display the menu and respond to choices.'''
-
         while True:
             self.display_menu(a)
             choice = input("Introdueix una opció: ")
@@ -81,19 +80,31 @@ class Menu:
     def establir_connexio(self):
         self.adObj.connect()
         print("Connexió establerta")
-       #print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
+       #print("{0}: {1}\n{2}".format("Connexió", self.adObj.c,"OK"))
 
     def search_all_users(self,f=reports["all_users"]):
         self.adObj.get_ldap_info(f)
-        print_results(self.adObj.c.response,self.adObj.c.response_to_json())
+       # print(self.adObj.c.response)
+        for elem in self.adObj.c.response:
+            print (elem) 
+       #print(self.adObj.c.result)
+        print(self.adObj.c.response_to_json())
 
     def search_all_computers(self,f=reports["all_computers"]):
         self.adObj.get_ldap_info(f)
-        print_results(self.adObj.c.response,self.adObj.c.response_to_json())
+       # print(self.adObj.c.response)
+        for elem in self.adObj.c.response:
+            print (elem) 
+       #print(self.adObj.c.result)
+        print(self.adObj.c.response_to_json())
 
     def search_all_groups(self,f=reports["all_groups"]):
         self.adObj.get_ldap_info(f)
-        print_results(self.adObj.c.response,self.adObj.c.response_to_json())
+       # print(self.adObj.c.response)
+        for elem in self.adObj.c.response:
+            print (elem) 
+       #print(self.adObj.c.result)
+        print(self.adObj.c.response_to_json())
 
     def modify_connection(self):
         self.adObj.disconnect()
@@ -105,4 +116,8 @@ class Menu:
         print("Adéu!!!!")
         self.adObj.disconnect()
         sys.exit(0)
+
+if __name__ == "__main__":
+    Menu().run(Menu().main_menu, Menu().choices)
+
 

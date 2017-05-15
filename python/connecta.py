@@ -39,4 +39,3 @@ class ConnectaAD():
     def disconnect(self):
         self.c.unbind()
 
-
