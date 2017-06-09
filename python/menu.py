@@ -2,7 +2,7 @@ import sys
 import connecta
 from collections import namedtuple
 from funcions import print_results
-
+import menuClass
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya")
 dc = Dades_DC("Test", 'dc1.problemeszero.com', 389, 'PZERO\\admin', 'Password1')
@@ -34,12 +34,12 @@ class Menu:
         "1": self.search_all_users,
         "2": self.search_all_computers,
         "3": self.search_all_groups,
-        "4": self.search_all_users,
+        "4": self.search,
         "5": self.enrera
         }
 
         self.main_menu="""
-        Menu
+        Menú
         1. Connecta
         2. Mostra el paràmetres de la connexió
         3. Selecciona un informe
@@ -65,7 +65,8 @@ class Menu:
         while True:
             self.display_menu(a)
             choice = input("Introdueix una opció: ")
-            action = b.get(choice)
+            ''' Si estam al menu principal no passam parametre a action. Si estam a una altre menu, passam com a parametre el report'''
+            action = b.get(choice) if a[9:13] == "Menú" else b.get(choice)(reports["all_users"])             
             if action:
                 action()
             else:
@@ -82,6 +83,11 @@ class Menu:
         self.adObj.connect()
         print("Connexió establerta")
        #print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
+
+    def search(self,f):
+        self.adObj.connect()
+        self.adObj.get_ldap_info(f)
+        print_results(self.adObj.c.response,self.adObj.c.response_to_json())
 
     def search_all_users(self,f=reports["all_users"]):
         self.adObj.get_ldap_info(f)
