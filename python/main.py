@@ -5,7 +5,7 @@ from connecta import ad
 
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya")
-dc = Dades_DC("Test", 'dc1.problemeszero.com', 389, 'PZERO\\admin', 'Password1')
+dc = Dades_DC("Test", 'dc1.problemeszero.com', 38913, 'PZERO\\admin', 'Password1')
 
 #reports = {
 #"all_users": ('DC=problemeszero,DC=com','(&(samAccountName=*)(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','memberOf','accountExpires','altSecurityIdentities','badPasswordTime', 'codePage','countryCode', 'homeDirectory','homeDrive','lastLogoff','lastLogon','lmPwdHistory','logonCount','mail','maxStorage',

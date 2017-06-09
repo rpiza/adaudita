@@ -1,6 +1,7 @@
 import menuClass as mc
 from connecta import ad
 import sys
+import ldap3.core.exceptions
 
 reports = {
 "all_users": ('DC=problemeszero,DC=com','(&(samAccountName=*)(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','memberOf','accountExpires','altSecurityIdentities','badPasswordTime', 'codePage','countryCode', 'homeDirectory','homeDrive','lastLogoff','lastLogon','lmPwdHistory','logonCount','mail','maxStorage',
@@ -20,10 +21,13 @@ def print_results(llista, json):
 
 
 def establir_connexio(adObj):
-    adObj.connect()
-    print("Connexió establerta")
-
-
+    try:
+        adObj.connect()
+        print("Connexió establerta")
+    except ldap3.core.exceptions.LDAPSocketOpenError:
+        print("\nEl DC no està disponible o l'adreça és incorrecte")
+    except ldap3.core.exceptions.LDAPBindError:
+        print("\nError en l'usuari o la contrasenya!!!")
 def show_connection(adObj):
     print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
 
@@ -38,9 +42,15 @@ def modify_connection():
     pass
 
 def quit(adObj):
-    print("Adéu!!!!")
-    adObj.disconnect()
-    sys.exit(0)
+#    adObj.disconnect()
+    try:
+        print("\nDesconnectant del Directori Actiu...")
+        adObj.disconnect()
+    except AttributeError:
+        print("No estaves connectat al Directori Actiu")
+    finally:    
+        print("Adéu!!!!")
+        sys.exit(0)
 
 def search(f):
     print("Cerca Oleeeee!!!!")
@@ -59,12 +69,13 @@ main_choices = {"1": [establir_connexio, ad],
 }
 
 main_menu = """
-Menú
-1. Connecta
-2. Mostra el paràmetres de la connexió
-3. Selecciona un informe
-4. Desconnecta
-5. Surt
+          Menú:
+
+    1. Connecta
+    2. Mostra el paràmetres de la connexió
+    3. Selecciona un informe
+    4. Desconnecta
+    5. Surt
 """
 reports_choices = {
 "1": [search,(reports["all_users"], ad)],
@@ -75,10 +86,11 @@ reports_choices = {
 }
 
 reports_menu="""
-Informes:
-1. Usuaris del domini
-2. Equips del domini
-3. Grups del domini amb usuaris/equips
-4. Extra
-5. Enrera
+         Informes:
+
+    1. Usuaris del domini
+    2. Equips del domini
+    3. Grups del domini amb usuaris/equips
+    4. Extra
+    5. Enrera
 """
