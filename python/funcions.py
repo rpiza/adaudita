@@ -25,7 +25,7 @@ def establir_connexio(adObj):
         adObj.connect()
         print("Connexió establerta")
     except ldap3.core.exceptions.LDAPSocketOpenError:
-        print("\nEl DC no està disponible o l'adreça és incorrecte")
+        print("\nEl DC no està disponible o l'adreça/port són incorrectes")
     except ldap3.core.exceptions.LDAPBindError:
         print("\nError en l'usuari o la contrasenya!!!")
 def show_connection(adObj):
@@ -37,6 +37,14 @@ def menu_reports(a):
 #    global with mc.Menu(reports_choices,reports_menu) as menu_r:
 
     menu_r.run()
+
+def menu_personalitzat(a):
+    global menu_p
+    menu_p = mc.Menu(personalitza_choices, personalitza_menu)
+    menu_p.run()
+
+def llegeix_input():
+    filtre = input("Introdueix el CN de l'objecte: ")
 
 def modify_connection():
     pass
@@ -61,6 +69,10 @@ def enrera(a):
     global menu_r
     menu_r.seguir = False
 
+def enrera_p(a):
+    global menu_p
+    menu_p.seguir = False
+
 main_choices = {"1": [establir_connexio, ad],
 "2": [show_connection, ad],
 "3": [menu_reports, None],
@@ -81,7 +93,7 @@ reports_choices = {
 "1": [search,(reports["all_users"], ad)],
 "2": [search,(reports["all_computers"], ad)],
 "3": [search,(reports["all_users"], ad)],
-"4": [search,(reports["all_users"], ad)],
+"4": [menu_personalitzat, None],
 "5": [enrera,"a"]
 }
 
@@ -91,6 +103,24 @@ reports_menu="""
     1. Usuaris del domini
     2. Equips del domini
     3. Grups del domini amb usuaris/equips
+    4. Cerca per Usuari/Equip/Grup
+    5. Enrera
+"""
+
+personalitza_choices = {
+"1": [llegeix_input,(reports["all_users"], ad)],
+"2": [search,(reports["all_computers"], ad)],
+"3": [search,(reports["all_users"], ad)],
+"4": [menu_personalitzat, None],
+"5": [enrera_p,"a"]
+}
+
+personalitza_menu="""
+         Informes:
+
+    1. Cerca per Usuari
+    2. Cerca per Equip
+    3. Cerca per Grup
     4. Extra
     5. Enrera
 """
