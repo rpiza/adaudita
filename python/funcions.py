@@ -3,14 +3,17 @@ from connecta import ad
 import sys
 import ldap3.core.exceptions
 
-reports = {
-"all_users": ('DC=problemeszero,DC=com','(&(samAccountName=*)(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','memberOf','accountExpires','altSecurityIdentities','badPasswordTime', 'codePage','countryCode', 'homeDirectory','homeDrive','lastLogoff','lastLogon','lmPwdHistory','logonCount','mail','maxStorage',
-'ntPwdHistory','otherMailbox','PasswordExpirationDate','primaryGroupID','profilePath','pwdLastSet',
-'sAMAccountType','scriptPath','unicodePwd','userAccountControl','userCertificate','userSharedFolder',
-'userWorkstations'],True),
-"all_computers": ('DC=problemeszero,DC=com','(&(samAccountName=*)(objectClass=computer)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','memberOf'],True),
-"all_groups": ('DC=problemeszero,DC=com','(&(objectClass=*)(objectCategory=CN=Group,CN=Schema,CN=Configuration,DC=problemeszero,DC=com))','SUBTREE',['cn','member'],True)
-}
+s_base='DC=problemeszero,DC=com'
+s_scope='SUBTREE'
+s_attributes=['cn','member']
+
+filtre_consola = 'cn=admin*' #Ha de ser None
+
+def actualitza_s_filter(t):
+    ''' Crear el filtre LDAP segons el tipus d'objecte '''
+   
+    return {'u':'(&(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,{s_base})({f2}))'.format(s_base=s_base,f2 = filtre_consola if filtre_consola else 'samAccountName=*'), 'c': '(&(objectClass=*)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,{s_base})({f2}))'.format(s_base=s_base,f2 = filtre_consola if filtre_consola else 'samAccountName=*'),'g':'(&(objectClass=*)(objectCategory=CN=Group,CN=Schema,CN=Configuration,{s_base})({f2}))'.format(s_base=s_base, f2 = filtre_consola if filtre_consola else 'samAccountName=*'),'*':'(&(objectClass=*)({f2}))'.format(s_base=s_base, f2 = filtre_consola if filtre_consola else 'samAccountName=*')}.get(t)
+
 
 def print_results(llista, json):
     #print(llista)
@@ -19,8 +22,8 @@ def print_results(llista, json):
    #print(adObj.c.result)
     print(json)
 
-
 def establir_connexio(adObj):
+    ''' Establix la connexio al DC'''
     try:
         adObj.connect()
         print("Connexió establerta")
@@ -28,14 +31,13 @@ def establir_connexio(adObj):
         print("\nEl DC no està disponible o l'adreça/port són incorrectes")
     except ldap3.core.exceptions.LDAPBindError:
         print("\nError en l'usuari o la contrasenya!!!")
+
 def show_connection(adObj):
     print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
 
 def menu_reports(a):
     global menu_r
     menu_r = mc.Menu(reports_choices,reports_menu)
-#    global with mc.Menu(reports_choices,reports_menu) as menu_r:
-
     menu_r.run()
 
 def menu_personalitzat(a):
@@ -43,14 +45,15 @@ def menu_personalitzat(a):
     menu_p = mc.Menu(personalitza_choices, personalitza_menu)
     menu_p.run()
 
-def llegeix_input():
-    filtre = input("Introdueix el CN de l'objecte: ")
+def llegeix_input(f):
+    global filtre_consola
+    filtre_consola = input("Introdueix l'objecte que vols cercar: ")
+    search(f)
 
 def modify_connection():
     pass
 
 def quit(adObj):
-#    adObj.disconnect()
     try:
         print("\nDesconnectant del Directori Actiu...")
         adObj.disconnect()
@@ -61,8 +64,16 @@ def quit(adObj):
         sys.exit(0)
 
 def search(f):
+
     print("Cerca Oleeeee!!!!")
-    f[1].get_ldap_info(f[0])
+    #Composicio del filtre per a la cerca
+    data = (s_base, actualitza_s_filter(f[0]), s_scope, s_attributes, True)
+#    print (data)
+#    return None
+    global filtre_consola 
+    filtre_consola = None
+
+    f[1].get_ldap_info(data)
     print_results(f[1].c.response, f[1].c.response_to_json())
 
 def enrera(a):
@@ -90,9 +101,9 @@ main_menu = """
     5. Surt
 """
 reports_choices = {
-"1": [search,(reports["all_users"], ad)],
-"2": [search,(reports["all_computers"], ad)],
-"3": [search,(reports["all_users"], ad)],
+"1": [search,('u', ad)],
+"2": [search,('c', ad)],
+"3": [search,('g', ad)],
 "4": [menu_personalitzat, None],
 "5": [enrera,"a"]
 }
@@ -108,19 +119,19 @@ reports_menu="""
 """
 
 personalitza_choices = {
-"1": [llegeix_input,(reports["all_users"], ad)],
-"2": [search,(reports["all_computers"], ad)],
-"3": [search,(reports["all_users"], ad)],
-"4": [menu_personalitzat, None],
+"1": [llegeix_input,('u', ad)],
+"2": [llegeix_input,('c', ad)],
+"3": [llegeix_input,('g', ad)],
+"4": [llegeix_input,('*', ad)],
 "5": [enrera_p,"a"]
 }
 
 personalitza_menu="""
-         Informes:
+         Informes 2:
 
     1. Cerca per Usuari
     2. Cerca per Equip
     3. Cerca per Grup
-    4. Extra
+    4. Cerca qualsevol objecte
     5. Enrera
 """
