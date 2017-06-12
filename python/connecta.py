@@ -8,19 +8,20 @@ class ConnectaAD():
     'Represents '
 
     c = None
-    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r'):
+    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r', ssl = 'False'):
         #this is the constructor that takes in host and port. retryAttempts is given 
         # a default value but can also be fed in.
         self.host = host
         self.port = port
-        self.u=u
-        self.pwd=pwd
+        self.u = u
+        self.pwd = pwd
+        self.ssl = ssl
 
 
     def connect(self):
         """Connecta amb el directori actiu definit."""
 
-        self.c = Connection(Server(self.host, port=self.port, use_ssl=False),
+        self.c = Connection(Server(self.host, port=self.port, use_ssl=self.ssl),
             auto_bind=AUTO_BIND_NO_TLS,
             read_only=True,
             check_names=True,

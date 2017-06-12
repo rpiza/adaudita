@@ -20,12 +20,11 @@ class Menu():
         while self.seguir:
             self.display()
             choice = input("Introdueix una opció: ")
-            ''' Si estam al menu principal no passam parametre a action. Si estam a una altre menu, passam com a parametre el report'''
-#            action = self.choices.get(choice) if self.txt_menu[9:13] == "Menú" else self.choices.get(choice)(reports["all_users"])  
-#            print (self.choices.get(choice)[0])
-            action = self.choices.get(choice)[0]
-            if action:
+#            print ('OPCIO: ',self.choices.get(choice))
+#            action = self.choices.get(choice)[0]
+            if self.choices.get(choice):
 #                print (self.choices.get(choice)[1])
+                action = self.choices.get(choice)[0]
                 action(self.choices.get(choice)[1])
             else:
                 print("{0} no és una opció vàlida".format(choice))
