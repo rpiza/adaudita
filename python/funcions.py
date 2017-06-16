@@ -6,16 +6,20 @@ import ldap3.core.exceptions
 import os
 import random
 import string
+from json2html import *
+import webbrowser
+import tempfile
+import time
 
-export_files = ['../exports', 'json']
-tipus_ext = ('csv', 'json', 'pdf','xml')
+export_files = ['../exports', 'html']
+tipus_ext = ('csv', 'json', 'pdf','xml','html')
 
 
 s_base='DC=problemeszero,DC=com'
 s_scope='SUBTREE'
 s_attributes=['cn','memberOf','member']
 
-filtre_consola = 'cn=admin*' #Ha de ser None
+filtre_consola = None # 'cn=admin*' #Ha de ser None
 
 def random_generator(size=8, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
@@ -61,6 +65,9 @@ def export_pdf():
 def export_xml():
     pass
 
+def export_html():
+    return '<html><head></head><h1>Titol de l informe</h1><body>' + json2html.convert(json = ad.c.response_to_json()) + '</body><html>'
+
 def menu_reports(a):
     ''' Crea el menu del informes'''
     global menu_r
@@ -72,6 +79,13 @@ def menu_personalitzat(a):
     global menu_p
     menu_p = mc.Menu(personalitza_choices, personalitza_menu)
     menu_p.run()
+
+def menu_atributs(a):
+    '''Crea el menu per modificar els atributs de la consulta'''
+    global menu_a
+    menu_a = mc.Menu(atributs_choices, atributs_menu)
+    veure_atributs(0)
+    menu_a.run()
 
 def menu_export(a):
     '''Crea el menu dels parametres d'exportació'''
@@ -99,8 +113,9 @@ def modify_connection():
 
 def search(f):
     '''Composicio del filtre de cerca ldap, executa la cerca i crida la funcio per imprimir els resultats'''
+    c=None
     data = (s_base, actualitza_s_filter(f[0]), s_scope, s_attributes, False)
-    print ("\nFiltre de cerca", data, "\n", s_attributes)
+    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", s_attributes, "\n")
 #    return None
     global filtre_consola 
     filtre_consola = None
@@ -112,8 +127,14 @@ def search(f):
         return
     except AttributeError:
         print("\nEi!!!! Comprova que has establert la connexió al DC!!!")  
-        return  
-    print_results(f[1].c.response, f[1].c.response_to_json())
+        return
+    #Mostrar el fitxer per pantalla o guardar a un fitxer
+    while c not in ['p','P', 'W', 'w','' ]:        
+        c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
+    if c in ['p','P']:   
+        print_results(f[1].c.response, f[1].c.response_to_json())
+    else:
+        result_open_html() 
 
 def llegeix_input(f):
     global filtre_consola
@@ -146,19 +167,59 @@ def veure_params(a):
 
 def result_export(a):
     '''Genera un fitxer amb els resultats de la darrera consulta'''
-
+    c = None
     nom_f = random_generator()
     nom_f_1 = input("\n\tNom del fitxer [{nom}]: ".format(nom = nom_f))
     if nom_f_1: nom_f = nom_f_1
 
     print('\n\tEl resultat es guardarà a ', export_files[0] + '/' + nom_f + '.' + export_files[1])
 
+
     try:
         f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
-        f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml}.get(export_files[1])())
+        f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(export_files[1])())
         f.close()
-    except: 
+
+        while c not in ['s','S', 'n', 'N','' ]:        
+            c = input('\n\tVols obrir el fitxer [s/N]: ')
+        if c in ['s','S']: webbrowser.open(export_files[0] + '/' + nom_f + '.' + export_files[1])
+
+    except:
+        print ("Unexpected error:", sys.exc_info()[0]) 
         return
+
+def result_open_html():
+    '''Obri el resultats de la darrera consulta a l'aplicacio html'''
+
+    try:
+        fp = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
+        fp.write(str.encode(export_html()))
+        fp.seek(0)
+        webbrowser.open(fp.name)
+
+    except:
+        print ("Unexpected error:", sys.exc_info()[0]) 
+        return
+
+def modifica_atributs(f):
+    c = None
+    global export_files
+    export_files[f] = input("Introdueix el nou valor: ")
+
+    if not os.path.exists(export_files[f]) and (f == 0):
+        while c not in ['s','S', 'n', 'N','' ]:        
+            c = input("El directori introduit no existeix. El vols crear[s/N]: ")
+        if c in ['s','S']: os.makedirs(export_files[f])
+
+    if (export_files[f] not in tipus_ext) and (f == 1): 
+        print('Els tipus d\'extensió possibles són:', tipus_ext)
+        while c not in tipus_ext:        
+            c = input('Tria un tipus de fitxer dels possibles. L\'extensió NO ha de incloure les \': ')
+        export_files[f] = c
+
+def veure_atributs(a):
+    print('\n\tAtributs: {f1}'.format(
+        f1 = s_attributes))
 
 def enrera(a):
     global menu_r
@@ -171,6 +232,10 @@ def enrera_p(a):
 def enrera_e(a):
     global menu_e
     menu_e.seguir = False
+
+def enrera_a(a):
+    global menu_a
+    menu_a.seguir = False
 
 def quit(adObj):
     try:
@@ -190,6 +255,7 @@ main_choices = {"3": [establir_connexio, ad],
 }
 
 main_menu = """
+===================================================================================================
           Menú:
 
     1. Selecciona un informe
@@ -203,21 +269,24 @@ reports_choices = {
 "2": [search,('c', ad)],
 "3": [search,('g', ad)],
 "4": [menu_personalitzat, None],
-"5": [result_export, None],
-"6": [menu_export, None],
-"7": [enrera, None]
+"5": [menu_atributs, None],
+"6": [result_export, None],
+"7": [menu_export, None],
+"8": [enrera, None]
 }
 
 reports_menu="""
+===================================================================================================
          Informes:
 
     1. Usuaris del domini
     2. Equips del domini
     3. Grups del domini amb usuaris/equips
     4. Cerca personalitzada per Usuari/Equip/Grup
-    5. Exporta el resultat
-    6. Paràmetres exportació fitxers
-    7. Enrera
+    5. Atributs de sortida
+    6. Exporta el resultat
+    7. Paràmetres exportació fitxers
+    8. Enrera
 """
 
 personalitza_choices = {
@@ -229,6 +298,7 @@ personalitza_choices = {
 }
 
 personalitza_menu="""
+===================================================================================================
          Informes 2:
 
     1. Cerca per Usuari
@@ -245,6 +315,7 @@ export_choices = {
 }
 
 export_menu="""
+===================================================================================================
          Modifica paràmetres exportació:
 
     1. Modifca ruta
@@ -253,4 +324,20 @@ export_menu="""
     4. Enrera
 """
 
+atributs_choices = {
+"1": [veure_atributs, 0],
+"2": [modifica_atributs, 1],
+"3": [veure_atributs, 0],
+"4": [enrera_a, None]
+}
+
+atributs_menu="""
+===================================================================================================
+         Modifica els atributs de les consultes:
+
+    1. Veure attributs
+    2. Modifica attributs
+    3. Extra
+    4. Enrera
+"""
 

@@ -17,10 +17,10 @@ funcions.show_connection(ad)
 menu_principal = Menu(funcions.main_choices,funcions.main_menu)
 
 if __name__ == "__main__":
-    try:
-       menu_principal.run()
-    except:
-        pass
+#    try:
+    menu_principal.run()
+#    except:
+#        pass
 #    except KeyboardInterupt:
 #        funcions.quit(ad)
 
