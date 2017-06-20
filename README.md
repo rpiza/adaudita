@@ -5,4 +5,4 @@ Necessita la version python 3.5
 
 Per obrir el programa executa la següent comanda
 
- # python python/main.py
+ *python python/main.py*.
