@@ -1,23 +1,20 @@
 import menuClass as mc
 from connecta import ad
 import sys
-import readline
+#import readline
 import ldap3.core.exceptions
 import os
 import random
 import string
-from json2html import *
 import webbrowser
 import tempfile
 import time
+import settings
+from exports import print_results, export_html, export_json, export_csv, export_pdf, export_xml
 
 export_files = ['../exports', 'html']
-tipus_ext = ('csv', 'json', 'pdf','xml','html')
+tipus_ext = ('csv', 'json', 'pdf', 'xml', 'html')
 
-
-s_base='DC=problemeszero,DC=com'
-s_scope='SUBTREE'
-s_attributes=['cn','memberOf','member']
 
 filtre_consola = None # 'cn=admin*' #Ha de ser None
 
@@ -27,46 +24,12 @@ def random_generator(size=8, chars=string.ascii_lowercase + string.digits):
 def actualitza_s_filter(t):
     ''' Crear el filtre LDAP segons el tipus d'objecte '''
     return '(&(objectClass=*)(objectCategory={f1})({f2}))'.format(
-            f1 = {'u':'CN=Person,CN=Schema,CN=Configuration,{s_base}'.format(s_base=s_base),
-                  'c':'CN=Computer,CN=Schema,CN=Configuration,{s_base}'.format(s_base=s_base),
-                  'g':'CN=Group,CN=Schema,CN=Configuration,{s_base}'.format(s_base=s_base), 
+            f1 = {'u':'CN=Person,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'c':'CN=Computer,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'g':'CN=Group,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base), 
                   '*':'*'}.get(t), 
             f2 = filtre_consola if filtre_consola else 'CN=*')
 
-def print_results(llista, json):
-    ''' Imprimiex el resultat de la consulta ldap'''
-    for elem in llista:
-#        if isinstance(elem,ldap3.utils.ciDict.CaseInsensitiveDict):
-        if elem.get('dn'):
-            print('\n\nDistinguished Name: ', elem.get('dn'))
-        if isinstance(elem.get('attributes'),ldap3.utils.ciDict.CaseInsensitiveDict):
-            for k, v in elem.get('attributes').items():
-
-                if isinstance(v,list):
-                    print(k,":")
-                    for e in v: print ("\t", e)
-#            print ("memberOf: ", elem.get('attributes').get('memberOf'))
-
-
-#        print (elem) 
-#    print(ad.c.result)
-#    print(llista)
-#    print(json)
-
-def export_json():
-    return ad.c.response_to_json()
-
-def export_csv():
-    pass
-
-def export_pdf():
-    pass
-
-def export_xml():
-    pass
-
-def export_html():
-    return '<html><head></head><h1>Titol de l informe</h1><body>' + json2html.convert(json = ad.c.response_to_json()) + '</body><html>'
 
 def menu_reports(a):
     ''' Crea el menu del informes'''
@@ -114,8 +77,8 @@ def modify_connection():
 def search(f):
     '''Composicio del filtre de cerca ldap, executa la cerca i crida la funcio per imprimir els resultats'''
     c=None
-    data = (s_base, actualitza_s_filter(f[0]), s_scope, s_attributes, False)
-    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", s_attributes, "\n")
+    data = (settings.search_fields.base, actualitza_s_filter(f[0]), settings.search_fields.scope, settings.search_fields.attributes, False)
+    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", settings.search_fields.attributes, "\n")
 #    return None
     global filtre_consola 
     filtre_consola = None
@@ -165,38 +128,45 @@ def veure_params(a):
     print('\n\tDades d\'exportació actuals:\n\t\t- Ruta: {f1}\n\t\t- Extensió: {f2}\n'.format(
         f1 = export_files[0], f2 = export_files[1]))
 
-def result_export(a):
+def result_export(adObj):
     '''Genera un fitxer amb els resultats de la darrera consulta'''
     c = None
+
+    if not os.path.exists(export_files[0]):
+        print ('\nEl directori d\'exportació: \'{f1}\', no existeix!!!\nRevisa els paràmetres d\'exportació de fitxers'.format(
+            f1=export_files[0]))
+        return
+    
+    #Generam un nom de fitxer aleatori
     nom_f = random_generator()
     nom_f_1 = input("\n\tNom del fitxer [{nom}]: ".format(nom = nom_f))
     if nom_f_1: nom_f = nom_f_1
-
+    
     print('\n\tEl resultat es guardarà a ', export_files[0] + '/' + nom_f + '.' + export_files[1])
-
-
+    
     try:
         f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
-        f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(export_files[1])())
+        f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(
+            export_files[1])(adObj))
         f.close()
-
+    
         while c not in ['s','S', 'n', 'N','' ]:        
             c = input('\n\tVols obrir el fitxer [s/N]: ')
         if c in ['s','S']: webbrowser.open(export_files[0] + '/' + nom_f + '.' + export_files[1])
-
+    
     except:
         print ("Unexpected error:", sys.exc_info()[0]) 
         return
 
 def result_open_html():
     '''Obri el resultats de la darrera consulta a l'aplicacio html'''
-
+    
     try:
         fp = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
-        fp.write(str.encode(export_html()))
+        fp.write(str.encode(export_html(ad)))
         fp.seek(0)
         webbrowser.open(fp.name)
-
+    
     except:
         print ("Unexpected error:", sys.exc_info()[0]) 
         return
@@ -219,7 +189,7 @@ def modifica_atributs(f):
 
 def veure_atributs(a):
     print('\n\tAtributs: {f1}'.format(
-        f1 = s_attributes))
+        f1 = settings.search_fields.attributes))
 
 def enrera(a):
     global menu_r
@@ -270,7 +240,7 @@ reports_choices = {
 "3": [search,('g', ad)],
 "4": [menu_personalitzat, None],
 "5": [menu_atributs, None],
-"6": [result_export, None],
+"6": [result_export, ad],
 "7": [menu_export, None],
 "8": [enrera, None]
 }
@@ -318,7 +288,7 @@ export_menu="""
 ===================================================================================================
          Modifica paràmetres exportació:
 
-    1. Modifca ruta
+    1. Modifica ruta
     2. Modifica extensió
     3. Veure els paràmetres
     4. Enrera
@@ -335,8 +305,8 @@ atributs_menu="""
 ===================================================================================================
          Modifica els atributs de les consultes:
 
-    1. Veure attributs
-    2. Modifica attributs
+    1. Veure atributs
+    2. Modifica atributs
     3. Extra
     4. Enrera
 """
