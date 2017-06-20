@@ -12,7 +12,7 @@ import time
 import settings
 from exports import print_results, export_html, export_json, export_csv, export_pdf, export_xml
 
-export_files = ['../exports', 'html']
+export_files = ['./exports', 'html']
 tipus_ext = ('csv', 'json', 'pdf', 'xml', 'html')
 
 
