@@ -1,4 +1,5 @@
 # adaudita
+
 Realització d'auditoria de Directori Actiu
 
 Necessita la version python 3.5

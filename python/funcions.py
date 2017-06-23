@@ -1,22 +1,22 @@
 import menuClass as mc
 from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad
 import settings
-from exports import print_results, export_html, export_json, export_csv, export_pdf, export_xml, result_open_html
+from exports import print_results, export_html, export_json, export_csv, export_pdf, result_open_html
 
 import sys
 import readline
 '''La funcio del modul readline es manternir history de les comandes executades. 
     Amb windows no he conseguit carregar aquest modul.
     Es pot comentar. No afecta al funcionamen del programa'''
-import ldap3.core.exceptions
 import os
 import random
 import string
 import time
 import webbrowser
+import ast
 
 export_files = ['./exports', 'csv']
-tipus_ext = ('csv', 'json', 'pdf', 'xml', 'html')
+tipus_ext = ('csv', 'json', 'pdf', 'html')
 
 #Cream les variables dels objectes Menu()
 global menus
@@ -95,7 +95,7 @@ def result_export(adObj):
     
 #try:
     f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
-    f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(
+    f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf, 'html': export_html}.get(
         export_files[1])(adObj))
     f.close()
 
@@ -107,21 +107,13 @@ def result_export(adObj):
 #    print ("Unexpected error:", sys.exc_info()[0]) 
 #    return
 
-def modifica_atributs(f):
-    c = None
-    global export_files
-    export_files[f] = input("Introdueix el nou valor: ")
+def intro_atributs(a):
+    settings.search_fields = settings.search_fields._replace( attributes = ast.literal_eval( "[" + input(
+                          'Introdueix el atributs entre \' i separats per ,\nExemple: \'cn\',\'memberOf\' :') + "]"))
 
-    if not os.path.exists(export_files[f]) and (f == 0):
-        while c not in ['s','S', 'n', 'N','' ]:        
-            c = input("El directori introduit no existeix. El vols crear[s/N]: ")
-        if c in ['s','S']: os.makedirs(export_files[f])
-
-    if (export_files[f] not in tipus_ext) and (f == 1): 
-        print('Els tipus d\'extensió possibles són:', tipus_ext)
-        while c not in tipus_ext:        
-            c = input('Tria un tipus de fitxer dels possibles. L\'extensió NO ha de incloure les \': ')
-        export_files[f] = c
+def mod_atributs(a):
+    settings.search_fields = settings.search_fields._replace(attributes={'a': settings.attr_advanced,
+                          'b': settings.attr_basic}.get(a))
 
 def veure_atributs(a):
     print('\n\tAtributs: {f1}'.format(
@@ -191,9 +183,10 @@ atributs_menu="""
          Modifica els atributs de les consultes:
 
     1. Veure atributs
-    2. Modifica atributs
-    3. Extra
-    4. Enrera
+    2. Atributs basics
+    3. Atributs avançats
+    4. Personalitza atributs
+    5. Enrera
 """
 
 personalitza_choices = {
@@ -213,9 +206,10 @@ export_choices = {
 
 atributs_choices = {
 "1": [veure_atributs, 0],
-"2": [modifica_atributs, 1],
-"3": [veure_atributs, 0],
-"4": [enrera, menus['m_atributs']]
+"2": [mod_atributs, 'b'],
+"3": [mod_atributs, 'a'],
+"4": [intro_atributs, None],
+"5": [enrera, menus['m_atributs']]
 }
 
 reports_choices = {
@@ -232,6 +226,6 @@ reports_choices = {
 main_choices = {"3": [establir_connexio, ad],
 "2": [show_connection, ad],
 "1": [crear_menu, [menus['m_reports'],reports_choices,reports_menu]],
-"4": [modify_connection, None],
+"4": [modify_connection, ad],
 "5": [quit, ad]
 }

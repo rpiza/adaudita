@@ -4,7 +4,7 @@ from ldap3 import Server, \
     AUTO_BIND_NO_TLS, \
     SUBTREE, \
     ALL_ATTRIBUTES
-
+import ldap3.core.exceptions
 
 
 class ConnectaAD():
@@ -60,8 +60,8 @@ def show_connection(adObj):
     '''Mostra les dades de la connexio actual'''
     print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
 
-def modify_connection():
-    pass
+def modify_connection(adObj):
+    adObj.disconnect()
 
 def actualitza_s_filter(t):
     ''' Crear el filtre LDAP segons el tipus d'objecte '''
