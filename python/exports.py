@@ -48,7 +48,8 @@ def result_open_html(adObj):
         return
 
 def results(llista):
-    ''' Imprimiex el resultat de la consulta ldap per pantalla'''
+    ''' Crear el resultat de la consulta ldap en format csv'''
+    separador = "\t"
     atributs = []
     for elem in llista:
         if elem.get('attributes'): atributs = atributs + list(elem.get('attributes').keys())    
