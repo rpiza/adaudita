@@ -7,24 +7,20 @@ import sys
 import ldap3.core.exceptions
 import re
 import time
+from taulaClass import Taula
 
 def convertir_temps(m):
     '''Convertiex la valor de temps de windows amb un string en format %Y-%m-%d %H:%M:%S '''
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((float(m.group(0))/1e7)-11676009600))
 
 def print_results(llista, json):
-    ''' Imprimiex el resultat de la consulta ldap per pantalla'''
-    for elem in llista:
-#        if isinstance(elem,ldap3.utils.ciDict.CaseInsensitiveDict):
-        if elem.get('dn'):
-            print('\n\nDistinguished Name: ', elem.get('dn'))
-        if isinstance(elem.get('attributes'),ldap3.utils.ciDict.CaseInsensitiveDict):
-            for k, v in elem.get('attributes').items():
+    ''' Imprimiex el resultat de la consulta ldap per pantalla
+    La variable amplada_col marca l'amplada de les columnes. Si es retornen massa atributs, els resultats
+    es superposen i no es veu correctament'''
 
-                if isinstance(v,list):
-                    print(k,":")
-                    for e in v: print ("\t", e)
-#            print ("memberOf: ", elem.get('attributes').get('memberOf'))
+    amplada_col= 20 
+    taula = Taula(results_2(llista), amplada_col, True, "|", "-")
+    print(taula)
 
 def export_json(adObj):
     return re.sub(r'\d{18}', convertir_temps, adObj.c.response_to_json(), count=0, flags=0)
@@ -73,4 +69,40 @@ def results(llista):
                 else : contingut = contingut + "\t"       
         contingut = contingut[:-1] + "\n"       
     return contingut
+
+
+
+def results_2(llista):
+    ''' Crear el resultat de com un llista de llistes. Els atributs de Cada objecte ldap corresponen a un llista'''
+
+    atributs = []
+    for elem in llista:
+        if elem.get('attributes'): atributs = atributs + list(elem.get('attributes').keys())  
+  
+    atributs = sorted(set(atributs))
+    atributs.insert(0,'dn')
+#    print(atributs)
+
+    contingut = []
+    contingut.append(atributs) 
+      
+    for elem in llista:
+        linia = []
+
+        if elem.get('dn'):
+            linia.append(str(elem.get('dn')))
+
+        for atribut in atributs:
+            if elem.get('attributes') and atribut != 'dn':
+                if elem.get('attributes').get(atribut):
+                    if isinstance(elem.get('attributes').get(atribut),list):
+                        linia.append(re.sub(r'\d{18}', convertir_temps,str(elem.get('attributes').get(
+                            atribut)).replace("\', \'", "; ")[2:-2], count=0, flags=0))
+                    else: linia.append(re.sub(r'\d{18}', convertir_temps,str(elem.get('attributes').get(
+                            atribut)), count=0, flags=0))
+                else : linia.append('')       
+        if linia: contingut.append(linia)       
+    return contingut
+
+
 
