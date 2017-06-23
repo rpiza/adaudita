@@ -1,111 +1,60 @@
 import menuClass as mc
-from connecta import ad
+from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad
+import settings
+from exports import print_results, export_html, export_json, export_csv, export_pdf, export_xml, result_open_html
+
 import sys
-#import readline
+import readline
+'''La funcio del modul readline es manternir history de les comandes executades. 
+    Amb windows no he conseguit carregar aquest modul.
+    Es pot comentar. No afecta al funcionamen del programa'''
 import ldap3.core.exceptions
 import os
 import random
 import string
-import webbrowser
-import tempfile
 import time
-import settings
-from exports import print_results, export_html, export_json, export_csv, export_pdf, export_xml
+import webbrowser
 
-export_files = ['./exports', 'html']
+export_files = ['./exports', 'csv']
 tipus_ext = ('csv', 'json', 'pdf', 'xml', 'html')
 
+#Cream les variables dels objectes Menu()
+global menus
+menus = {'m_reports': None, 'm_personalitzat': None, 'm_atributs': None, 'm_export': None}
 
-filtre_consola = None # 'cn=admin*' #Ha de ser None
+for menu in menus.keys():
+    menus[menu] = mc.Menu()
+##Then you can reference them with:
+#menus['m_personalitzat'].temperature()
 
 def random_generator(size=8, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
-def actualitza_s_filter(t):
-    ''' Crear el filtre LDAP segons el tipus d'objecte '''
-    return '(&(objectClass=*)(objectCategory={f1})({f2}))'.format(
-            f1 = {'u':'CN=Person,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
-                  'c':'CN=Computer,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
-                  'g':'CN=Group,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base), 
-                  '*':'*'}.get(t), 
-            f2 = filtre_consola if filtre_consola else 'CN=*')
-
-
-def menu_reports(a):
-    ''' Crea el menu del informes'''
-    global menu_r
-    menu_r = mc.Menu(reports_choices,reports_menu)
-    menu_r.run()
-
-def menu_personalitzat(a):
-    '''Crea el menu de les cerques personalitzades'''
-    global menu_p
-    menu_p = mc.Menu(personalitza_choices, personalitza_menu)
-    menu_p.run()
-
-def menu_atributs(a):
-    '''Crea el menu per modificar els atributs de la consulta'''
-    global menu_a
-    menu_a = mc.Menu(atributs_choices, atributs_menu)
-    veure_atributs(0)
-    menu_a.run()
-
-def menu_export(a):
-    '''Crea el menu dels parametres d'exportació'''
-    global menu_e
-    menu_e = mc.Menu(export_choices, export_menu)
-    veure_params(0)
-    menu_e.run()
-
-def establir_connexio(adObj):
-    ''' Estableix la connexio al DC'''
-    try:
-        adObj.connect()
-        print("Connexió establerta")
-    except ldap3.core.exceptions.LDAPSocketOpenError:
-        print("\nEl DC no està disponible o l'adreça/port són incorrectes")
-    except ldap3.core.exceptions.LDAPBindError:
-        print("\nError en l'usuari o la contrasenya!!!")
-
-def show_connection(adObj):
-    '''Mostra les dades de la connexio actual'''
-    print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
-
-def modify_connection():
-    pass
+def crear_menu(m):
+    '''Funcio que inicialitza un objtecte Menu()'''
+    m[0].__init__(m[1],m[2])
+    m[0].run()
 
 def search(f):
-    '''Composicio del filtre de cerca ldap, executa la cerca i crida la funcio per imprimir els resultats'''
-    c=None
-    data = (settings.search_fields.base, actualitza_s_filter(f[0]), settings.search_fields.scope, settings.search_fields.attributes, False)
-    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", settings.search_fields.attributes, "\n")
-#    return None
-    global filtre_consola 
-    filtre_consola = None
-#   Execucio de la cerca al ldap
-    try:
-        f[1].get_ldap_info(data)
-    except ldap3.core.exceptions.LDAPInvalidFilterError:
-        print("\nEi!!!! Hi ha un error en el filtre!!!")
-        return
-    except AttributeError:
-        print("\nEi!!!! Comprova que has establert la connexió al DC!!!")  
-        return
-    #Mostrar el fitxer per pantalla o guardar a un fitxer
+    ''' executa la funcio de search_ad i crida la funcio per imprimir els resultats'''
+
+    adObj = search_ad(f)
+
+    c = None
     while c not in ['p','P', 'W', 'w','' ]:        
         c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
     if c in ['p','P']:   
-        print_results(f[1].c.response, f[1].c.response_to_json())
+        print_results(adObj.c.response, adObj.c.response_to_json())
     else:
-        result_open_html() 
+        result_open_html(adObj) 
 
 def llegeix_input(f):
-    global filtre_consola
+
     print ('''Exemples de filtres de cerca:
             cn=admin*
             &(GivenName=John)(SN=Doe)
             |(GivenName=John)(GivenName=Joe)''')
-    filtre_consola = input("Introdueix el filtre ldap de la cerca: ")
+    settings.filtre_consola = input("Introdueix el filtre ldap de la cerca: ")
     search(f)
 
 def modifica_param(f):
@@ -144,32 +93,19 @@ def result_export(adObj):
     
     print('\n\tEl resultat es guardarà a ', export_files[0] + '/' + nom_f + '.' + export_files[1])
     
-    try:
-        f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
-        f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(
-            export_files[1])(adObj))
-        f.close()
-    
-        while c not in ['s','S', 'n', 'N','' ]:        
-            c = input('\n\tVols obrir el fitxer [s/N]: ')
-        if c in ['s','S']: webbrowser.open(export_files[0] + '/' + nom_f + '.' + export_files[1])
-    
-    except:
-        print ("Unexpected error:", sys.exc_info()[0]) 
-        return
+#try:
+    f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
+    f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf,'xml': export_xml,'html': export_html}.get(
+        export_files[1])(adObj))
+    f.close()
 
-def result_open_html():
-    '''Obri el resultats de la darrera consulta a l'aplicacio html'''
-    
-    try:
-        fp = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
-        fp.write(str.encode(export_html(ad)))
-        fp.seek(0)
-        webbrowser.open(fp.name)
-    
-    except:
-        print ("Unexpected error:", sys.exc_info()[0]) 
-        return
+    while c not in ['s','S', 'n', 'N','' ]:        
+        c = input('\n\tVols obrir el fitxer [s/N]: ')
+    if c in ['s','S']: webbrowser.open(export_files[0] + '/' + nom_f + '.' + export_files[1])
+
+#except:
+#    print ("Unexpected error:", sys.exc_info()[0]) 
+#    return
 
 def modifica_atributs(f):
     c = None
@@ -191,21 +127,8 @@ def veure_atributs(a):
     print('\n\tAtributs: {f1}'.format(
         f1 = settings.search_fields.attributes))
 
-def enrera(a):
-    global menu_r
-    menu_r.seguir = False
-
-def enrera_p(a):
-    global menu_p
-    menu_p.seguir = False
-
-def enrera_e(a):
-    global menu_e
-    menu_e.seguir = False
-
-def enrera_a(a):
-    global menu_a
-    menu_a.seguir = False
+def enrera(m):
+    m.quit()
 
 def quit(adObj):
     try:
@@ -217,13 +140,6 @@ def quit(adObj):
         print("Adéu!!!!")
         sys.exit(0)
 
-main_choices = {"3": [establir_connexio, ad],
-"2": [show_connection, ad],
-"1": [menu_reports, None],
-"4": [modify_connection, None],
-"5": [quit, ad]
-}
-
 main_menu = """
 ===================================================================================================
           Menú:
@@ -234,16 +150,6 @@ main_menu = """
     4. Desconnecta del ldap
     5. Surt de l'aplicació
 """
-reports_choices = {
-"1": [search,('u', ad)],
-"2": [search,('c', ad)],
-"3": [search,('g', ad)],
-"4": [menu_personalitzat, None],
-"5": [menu_atributs, None],
-"6": [result_export, ad],
-"7": [menu_export, None],
-"8": [enrera, None]
-}
 
 reports_menu="""
 ===================================================================================================
@@ -259,14 +165,6 @@ reports_menu="""
     8. Enrera
 """
 
-personalitza_choices = {
-"1": [llegeix_input,('u', ad)],
-"2": [llegeix_input,('c', ad)],
-"3": [llegeix_input,('g', ad)],
-"4": [llegeix_input,('*', ad)],
-"5": [enrera_p, None]
-}
-
 personalitza_menu="""
 ===================================================================================================
          Informes 2:
@@ -277,12 +175,6 @@ personalitza_menu="""
     4. Cerca qualsevol objecte
     5. Enrera
 """
-export_choices = {
-"1": [modifica_param, 0],
-"2": [modifica_param, 1],
-"3": [veure_params, 0],
-"4": [enrera_e, None]
-}
 
 export_menu="""
 ===================================================================================================
@@ -294,13 +186,6 @@ export_menu="""
     4. Enrera
 """
 
-atributs_choices = {
-"1": [veure_atributs, 0],
-"2": [modifica_atributs, 1],
-"3": [veure_atributs, 0],
-"4": [enrera_a, None]
-}
-
 atributs_menu="""
 ===================================================================================================
          Modifica els atributs de les consultes:
@@ -311,3 +196,42 @@ atributs_menu="""
     4. Enrera
 """
 
+personalitza_choices = {
+"1": [llegeix_input,('u', ad)],
+"2": [llegeix_input,('c', ad)],
+"3": [llegeix_input,('g', ad)],
+"4": [llegeix_input,('*', ad)],
+"5": [enrera, menus['m_personalitzat']]
+}
+
+export_choices = {
+"1": [modifica_param, 0],
+"2": [modifica_param, 1],
+"3": [veure_params, 0],
+"4": [enrera, menus['m_export']]
+}
+
+atributs_choices = {
+"1": [veure_atributs, 0],
+"2": [modifica_atributs, 1],
+"3": [veure_atributs, 0],
+"4": [enrera, menus['m_atributs']]
+}
+
+reports_choices = {
+"1": [search,('u', ad)],
+"2": [search,('c', ad)],
+"3": [search,('g', ad)],
+"4": [crear_menu, [menus['m_personalitzat'], personalitza_choices, personalitza_menu]],
+"5": [crear_menu, [menus['m_atributs'], atributs_choices, atributs_menu]],
+"6": [result_export, ad],
+"7": [crear_menu, [menus['m_export'], export_choices, export_menu]],
+"8": [enrera, menus['m_reports']]
+}
+
+main_choices = {"3": [establir_connexio, ad],
+"2": [show_connection, ad],
+"1": [crear_menu, [menus['m_reports'],reports_choices,reports_menu]],
+"4": [modify_connection, None],
+"5": [quit, ad]
+}

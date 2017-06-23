@@ -4,7 +4,7 @@
 
 class Menu():
 
-    def __init__(self, choices, txt_menu): 
+    def __init__(self, choices="", txt_menu=""): 
         # a default value but can also be fed in.
         self.choices = choices
         self.txt_menu = txt_menu
@@ -21,13 +21,15 @@ class Menu():
             self.display()
             choice = input("Introdueix una opció: ")
 #            print ('OPCIO: ',self.choices.get(choice))
-#            action = self.choices.get(choice)[0]
             if self.choices.get(choice):
 #                print (self.choices.get(choice)[1])
                 action = self.choices.get(choice)[0]
                 action(self.choices.get(choice)[1])
             else:
                 print("{0} no és una opció vàlida".format(choice))
+
+    def quit(self):
+        self.seguir=False
 
     def __enter__(self):
         return self

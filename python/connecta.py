@@ -1,9 +1,12 @@
+import settings
 from ldap3 import Server, \
     Connection, \
     AUTO_BIND_NO_TLS, \
     SUBTREE, \
     ALL_ATTRIBUTES
- 
+
+
+
 class ConnectaAD():
     'Represents '
 
@@ -42,6 +45,53 @@ class ConnectaAD():
 
 
 ad = ConnectaAD()
+
+def establir_connexio(adObj):
+    ''' Estableix la connexio al DC'''
+    try:
+        adObj.connect()
+        print("Connexió establerta")
+    except ldap3.core.exceptions.LDAPSocketOpenError:
+        print("\nEl DC no està disponible o l'adreça/port són incorrectes")
+    except ldap3.core.exceptions.LDAPBindError:
+        print("\nError en l'usuari o la contrasenya!!!")
+
+def show_connection(adObj):
+    '''Mostra les dades de la connexio actual'''
+    print("{0}: {1}\n{2}".format("Connexió", adObj.c,"OK"))
+
+def modify_connection():
+    pass
+
+def actualitza_s_filter(t):
+    ''' Crear el filtre LDAP segons el tipus d'objecte '''
+    return '(&(objectClass=*)(objectCategory={f1})({f2}))'.format(
+            f1 = {'u':'CN=Person,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'c':'CN=Computer,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'g':'CN=Group,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base), 
+                  '*':'*'}.get(t), 
+            f2 = settings.filtre_consola if settings.filtre_consola else 'CN=*')
+
+def search_ad(f):
+    '''Composicio del filtre de cerca ldap, executa la cerca i 
+    i retorna l'objecte per a imprimir els resultats'''
+
+    data = (settings.search_fields.base, actualitza_s_filter(f[0]), settings.search_fields.scope, settings.search_fields.attributes, False)
+    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", settings.search_fields.attributes, "\n")
+
+    settings.filtre_consola = None
+#   Execucio de la cerca al ldap
+    try:
+        f[1].get_ldap_info(data)
+        return f[1]
+    except ldap3.core.exceptions.LDAPInvalidFilterError:
+        print("\nEi!!!! Hi ha un error en el filtre!!!")
+        return
+    except AttributeError:
+        print("\nEi!!!! Comprova que has establert la connexió al DC!!!")  
+        return
+
+
 
 
 
