@@ -36,6 +36,7 @@ def export_pdf(adObj):
 def export_html(adObj):
     html = '<html><head></head><h1>Titol de l informe</h1><body>' + json2html.convert(
         json = adObj.c.response_to_json()).replace('<th>entries</th>','') + '</body><html>'
+#    return html
     return re.sub(r'\d{18}', convertir_temps, html, count=0, flags=0)
 
 def result_open_html(adObj):

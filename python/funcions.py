@@ -1,6 +1,7 @@
-import menuClass as mc
+#import menuClass as mc
 from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad
 import settings
+from settings import menus
 from exports import print_results, export_html, export_json, export_csv, export_pdf, result_open_html
 
 import sys
@@ -20,12 +21,12 @@ tipus_ext = ('csv', 'json', 'pdf', 'html')
 
 #Cream les variables dels objectes Menu()
 global menus
-menus = {'m_reports': None, 'm_personalitzat': None, 'm_atributs': None, 'm_export': None}
+#menus = {'m_reports': None, 'm_personalitzat': None, 'm_atributs': None, 'm_export': None, 'm_informes': None}
 
-for menu in menus.keys():
-    menus[menu] = mc.Menu()
-##Then you can reference them with:
-#menus['m_personalitzat'].temperature()
+#for menu in menus.keys():
+#    menus[menu] = mc.Menu()
+###Then you can reference them with:
+##menus['m_personalitzat'].temperature()
 
 def random_generator(size=8, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
@@ -47,6 +48,19 @@ def search(f):
         print_results(adObj.c.response, adObj.c.response_to_json())
     else:
         result_open_html(adObj) 
+
+#def search_v2(f):
+#    ''' executa la funcio de search_ad_v2 i crida la funcio per imprimir els resultats'''
+
+#    adObj = search_ad_v2(f)
+
+#    c = None
+#    while c not in ['p','P', 'W', 'w','' ]:        
+#        c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
+#    if c in ['p','P']:   
+#        print_results(adObj.c.response, adObj.c.response_to_json())
+#    else:
+#        result_open_html(adObj) 
 
 def llegeix_input(f):
 
@@ -137,7 +151,7 @@ main_menu = """
           Menú:
 
     1. Selecciona un informe
-    2. Mostra el paràmetres de la connexió
+    2. Mostra els paràmetres de la connexió
     3. Connecta al ldap
     4. Desconnecta del ldap
     5. Surt de l'aplicació
@@ -151,10 +165,11 @@ reports_menu="""
     2. Equips del domini
     3. Grups del domini amb usuaris/equips
     4. Cerca personalitzada per Usuari/Equip/Grup
-    5. Atributs de sortida
-    6. Exporta el resultat
-    7. Paràmetres exportació fitxers
-    8. Enrera
+    5. Informes personalitzats
+    6. Atributs de sortida
+    7. Exporta el resultat
+    8. Paràmetres exportació fitxers
+    9. Enrera
 """
 
 personalitza_menu="""
@@ -217,10 +232,11 @@ reports_choices = {
 "2": [search,('c', ad)],
 "3": [search,('g', ad)],
 "4": [crear_menu, [menus['m_personalitzat'], personalitza_choices, personalitza_menu]],
-"5": [crear_menu, [menus['m_atributs'], atributs_choices, atributs_menu]],
-"6": [result_export, ad],
-"7": [crear_menu, [menus['m_export'], export_choices, export_menu]],
-"8": [enrera, menus['m_reports']]
+"5": [crear_menu, [menus['m_informes'], settings.choices, settings.menu_txt]],
+"6": [crear_menu, [menus['m_atributs'], atributs_choices, atributs_menu]],
+"7": [result_export, ad],
+"8": [crear_menu, [menus['m_export'], export_choices, export_menu]],
+"9": [enrera, menus['m_reports']]
 }
 
 main_choices = {"3": [establir_connexio, ad],

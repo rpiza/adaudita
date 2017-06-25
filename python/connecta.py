@@ -91,7 +91,24 @@ def search_ad(f):
         print("\nEi!!!! Comprova que has establert la connexió al DC!!!")  
         return
 
+def search_ad_v2(f):
+    '''Cerca dels Informes Personalitzats. Composicio del filtre de cerca ldap, executa la cerca i 
+    i retorna l'objecte per a imprimir els resultats'''
 
+    data = (f[0][1], f[0][4], f[0][2], f[0][3], False)
+    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", f[0][4], "\n")
+
+    settings.filtre_consola = None
+#   Execucio de la cerca al ldap
+    try:
+        f[1].get_ldap_info(data)
+        return f[1]
+    except ldap3.core.exceptions.LDAPInvalidFilterError:
+        print("\nEi!!!! Hi ha un error en el filtre!!!")
+        return
+    except AttributeError:
+        print("\nEi!!!! Comprova que has establert la connexió al DC!!!")  
+        return
 
 
 

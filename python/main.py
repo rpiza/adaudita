@@ -1,16 +1,20 @@
+import settings
 from menuClass import Menu
 #from collections import namedtuple
-import funcions as funcions
+#import funcions as funcions
 from connecta import ad
-import settings
 
 
 def main():
-#    Inicialitzam els parametes de l'aplicacio
+    #Inicialitzam els parametes de l'aplicacio
     settings.init()
 
     #Cream l'objecte de connexio al ldap
     ad.__init__(settings.dc.host, settings.dc.port, settings.dc.usuari, settings.dc.contrasenya, settings.dc.ssl)
+
+    #Inicialitzam els parametres de l'aplicacio que necessiten l'objecte de connexio al directori actiu
+    settings.init2(ad)
+    import funcions as funcions #Abans d'importar aquest modul es necessari inicialitzar les variables del modul settings
 
     #Establim la connexio al ldap
     print("\n")
