@@ -4,8 +4,8 @@ import funcions as funcions
 from connecta import ad
 import settings
 
-if __name__ == "__main__":
 
+def main():
 #    Inicialitzam els parametes de l'aplicacio
     settings.init()
 
@@ -22,7 +22,6 @@ if __name__ == "__main__":
     #Cream el menu principal
     menu_principal = Menu(funcions.main_choices,funcions.main_menu)
 
-
 #    try:
     menu_principal.run()
 #    except:
@@ -30,3 +29,5 @@ if __name__ == "__main__":
 #    except KeyboardInterupt:
 #        funcions.quit(ad)
 
+if __name__ == "__main__":
+    main()

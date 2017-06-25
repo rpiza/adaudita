@@ -3,7 +3,7 @@ from collections import namedtuple
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya ssl")
 Search = namedtuple("Search", "nom base scope attributes")
 
-attr_basic = ['cn','memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime']
+attr_basic = ['cn','memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime', 'whenCreated']
 attr_advanced = ['cn', 'givenname','sn', 'mail', 'admincount', 'memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime']
 
 def init():
