@@ -6,12 +6,8 @@ import tempfile
 import sys
 import ldap3.core.exceptions
 import re
-import time
 from taulaClass import Taula
-
-def convertir_temps(m):
-    '''Convertiex la valor de temps de windows amb un string en format %Y-%m-%d %H:%M:%S '''
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((float(m.group(0))/1e7)-11676009600))
+from time_functions import convertir_temps
 
 def print_results(llista, json):
     ''' Imprimiex el resultat de la consulta ldap per pantalla

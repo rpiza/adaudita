@@ -1,13 +1,7 @@
 from collections import namedtuple
 import menuClass as mc
 from funcions2 import search_v2, enrera_v2
-import time
-
-def restar_dies_data_actual(dies):
-    '''Calcular el valor en nanosegons restant a la data actual el valor de "dies".
-     Retorna el valor de windows per calcular variables de temps'''
-    return (int((time.time() - (dies*86400) + 11676009600)*1e7))
-
+from time_functions import restar_dies_data_actual, convertir_data
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya ssl")
 Search = namedtuple("Search", "nom base scope attributes filter")
@@ -33,7 +27,11 @@ llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUB
                         f1=restar_dies_data_actual(60)) ],
                    ["Usuaris que pertanyen al grup \'Domain Admins\'", 'DC=problemeszero,DC=com','SUBTREE', \
                         ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated'],'(&(objectClass=*) \
-                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(memberOf=CN=Domain Admins,CN=Users,DC=problemeszero,DC=com))']
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(memberOf=CN=Domain Admins,CN=Users,DC=problemeszero,DC=com))'],
+                   ["Usuaris amb darrer logon abans de 2016-06-09", 'DC=problemeszero,DC=com','SUBTREE', \
+                        ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(lastlogon<={f1}))'.format(
+f1=convertir_data(2016,6,9,20,40))]
                    ]
 
 choices = {}
@@ -71,8 +69,4 @@ def init2(adObj):
         i =  i + 1
     choices.update({ str(i) : [enrera_v2, menus['m_informes']]})
     menu_txt = menu_txt + "    " + str(i) + ". Enrera\n"    
-
-#time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((float(m.group(0))/1e7)-11676009600))
-#convertir human readable to epoch
-#int(time.mktime(time.strptime('2016-06-02T10:30:00.020', '%Y-%m-%dT%H:%M:%S.%f')))
 
