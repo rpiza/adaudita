@@ -163,7 +163,7 @@ reports_menu="""
 
     1. Usuaris del domini
     2. Equips del domini
-    3. Grups del domini amb usuaris/equips
+    3. Grups del domini per usuaris/equips
     4. Cerca personalitzada per Usuari/Equip/Grup
     5. Informes personalitzats
     6. Atributs de sortida
