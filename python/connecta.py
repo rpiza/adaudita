@@ -96,7 +96,7 @@ def search_ad_v2(f):
     i retorna l'objecte per a imprimir els resultats'''
 
     data = (f[0][1], f[0][4], f[0][2], f[0][3], False)
-    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", f[0][4], "\n")
+    print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", f[0][3], "\n")
 
     settings.filtre_consola = None
 #   Execucio de la cerca al ldap
