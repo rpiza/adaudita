@@ -48,3 +48,5 @@ El desenvolupament de l'eina s'ha realitzat amb un client Ubuntu 16.04.
 Hem detectat algun problema a l'hora d'executar l'aplicació amb clients amb sistema operatiu Windows. Sobretot en la presentació dels informes i en la conversió dels valors de temps, propis de windows, a valors de data utiltzats per l'aplicació.
 
 Als entorns Windows el mòdul **readline** no és necessari. Es pot comentar la linia que hi fa referència del fitxer **funcions.py**, si vos genera errors.
+
+Heu de tenir en compte que els **Informes personalitzats** inclosos en el fitxer **settings.py**, tenen els filtres dels objectes configurats amb el search_base de l'entorn de proves. Per a que vos funcionin correctament, els heu configurar adequadament amb els paràmetres del vostre entorn.
