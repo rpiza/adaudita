@@ -1,3 +1,6 @@
+#BRANCA EN DESENVOLUPAMENT. SELECCIONA master
+
+
 # Auditoria d'Active Directory - ADaudita
 
 Aplicació d'auditoria de Directori Actiu
