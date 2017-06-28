@@ -7,7 +7,9 @@ import sys
 import ldap3.core.exceptions
 import re
 from taulaClass import Taula
-from time_functions import convertir_temps
+from time_functions import convertir_temps, convertir_UTC_a_local
+
+
 
 def print_results(llista, json):
     ''' Imprimiex el resultat de la consulta ldap per pantalla
@@ -19,10 +21,10 @@ def print_results(llista, json):
     print(taula)
 
 def export_json(adObj):
-    return re.sub(r'\d{18}', convertir_temps, adObj.c.response_to_json(), count=0, flags=0)
+    return re.sub(r'\d{14}.\d{,3}Z|\d{18}', convertir_cerca, adObj.c.response_to_json(), count=0, flags=0)
 
 def export_csv(adObj):
-    return re.sub(r'\d{18}', convertir_temps, results(adObj.c.response), count=0, flags=0)
+    return re.sub(r'\d{14}.\d{,3}Z|\d{18}', convertir_cerca, results(adObj.c.response), count=0, flags=0)
     #return results(adObj.c.response)
 
 def export_pdf(adObj):
@@ -33,7 +35,7 @@ def export_html(adObj):
     html = '<html><head></head><h1>Titol de l informe</h1><body>' + json2html.convert(
         json = adObj.c.response_to_json()).replace('<th>entries</th>','') + '</body><html>'
 #    return html
-    return re.sub(r'\d{18}', convertir_temps, html, count=0, flags=0)
+    return re.sub(r'\d{14}.\d{,3}Z|\d{18}', convertir_cerca, html, count=0, flags=0)
 
 def result_open_html(adObj):
     '''Obri el resultats de la darrera consulta a l'aplicacio html'''  
@@ -93,13 +95,17 @@ def results_2(llista):
             if elem.get('attributes') and atribut != 'dn':
                 if elem.get('attributes').get(atribut):
                     if isinstance(elem.get('attributes').get(atribut),list):
-                        linia.append(re.sub(r'\d{18}', convertir_temps,str(elem.get('attributes').get(
-                            atribut)).replace("\', \'", "; ")[2:-2], count=0, flags=0))
-                    else: linia.append(re.sub(r'\d{18}', convertir_temps,str(elem.get('attributes').get(
-                            atribut)), count=0, flags=0))
+                        linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', convertir_cerca,str(
+                                    elem.get('attributes').get(atribut)).replace("\', \'", "; ")[2:-2], count=0, flags=0))
+                    else: linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', convertir_cerca,str(
+                                    elem.get('attributes').get(atribut)), count=0, flags=0))
                 else : linia.append('')       
         if linia: contingut.append(linia)       
     return contingut
 
+
+def convertir_cerca(m):
+    '''Depenent del resultat de la cerca amb re.sub executa la conversio ISO o la epoch'''
+    return convertir_UTC_a_local(m.group(0)) if 'Z' in m.group(0) else convertir_temps(m.group(0))
 
 

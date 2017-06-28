@@ -17,7 +17,7 @@ Camps de llista_informes:
 [[Nom de l'informe, search_base, scope, atributs a retornar, filtre]]
 RECORDA A INTRODUIR UNA COMA ENTRE ELS DIFERENTS INFORMES,SI NO PYTHON GENERA AQUEST ERROR:(TypeError: list indices must be integers or slices, not tuple)
 '''
-llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUBTREE', ['samaccountname', 'whenCreated'],
+llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUBTREE', ['lastlogon','samaccountname', 'whenchanged','whenCreated'],
                         '(&(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=admin))'],
                    ["Informe Equip = \'DC1\'", 'DC=problemeszero,DC=com','SUBTREE', attr_basic, 
                         '(&(objectClass=*)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=DC1))'],

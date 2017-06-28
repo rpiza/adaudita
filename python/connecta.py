@@ -11,7 +11,7 @@ class ConnectaAD():
     'Represents '
 
     c = None
-    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r', ssl = 'False'):
+    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r', ssl = 'False', fc = None):
         #this is the constructor that takes in host and port. retryAttempts is given 
         # a default value but can also be fed in.
         self.host = host
@@ -19,6 +19,7 @@ class ConnectaAD():
         self.u = u
         self.pwd = pwd
         self.ssl = ssl
+        self.filtre_consola = fc
 
 
     def connect(self):
@@ -72,6 +73,15 @@ def actualitza_s_filter(t):
                   '*':'*'}.get(t), 
             f2 = settings.filtre_consola if settings.filtre_consola else 'CN=*')
 
+def actualitza_s_filter_v2(t):
+    ''' Crear el filtre LDAP segons el tipus d'objecte '''
+    return '(&(objectClass=*)(objectCategory={f1})({f2}))'.format(
+            f1 = {'u':'CN=Person,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'c':'CN=Computer,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base),
+                  'g':'CN=Group,CN=Schema,CN=Configuration,{s_base}'.format(s_base=settings.search_fields.base), 
+                  '*':'*'}.get(t), 
+            f2 = self.filtre_consola if self.filtre_consola else 'CN=*')
+
 def search_ad(f):
     '''Composicio del filtre de cerca ldap, executa la cerca i 
     i retorna l'objecte per a imprimir els resultats'''
@@ -98,7 +108,7 @@ def search_ad_v2(f):
     data = (f[0][1], f[0][4], f[0][2], f[0][3], False)
     print ("\n\nFiltre de cerca: ", data, "\n\nAtributs retornats: ", f[0][3], "\n")
 
-    settings.filtre_consola = None
+    self.filtre_consola = None
 #   Execucio de la cerca al ldap
     try:
         f[1].get_ldap_info(data)

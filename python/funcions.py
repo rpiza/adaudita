@@ -16,7 +16,7 @@ import time
 import webbrowser
 import ast
 
-export_files = ['./exports', 'csv']
+export_files = ['./exports', 'csv', ('csv', 'json', 'pdf', 'html')]
 tipus_ext = ('csv', 'json', 'pdf', 'html')
 
 #Cream les variables dels objectes Menu()
@@ -48,19 +48,6 @@ def search(f):
         print_results(adObj.c.response, adObj.c.response_to_json())
     else:
         result_open_html(adObj) 
-
-#def search_v2(f):
-#    ''' executa la funcio de search_ad_v2 i crida la funcio per imprimir els resultats'''
-
-#    adObj = search_ad_v2(f)
-
-#    c = None
-#    while c not in ['p','P', 'W', 'w','' ]:        
-#        c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
-#    if c in ['p','P']:   
-#        print_results(adObj.c.response, adObj.c.response_to_json())
-#    else:
-#        result_open_html(adObj) 
 
 def llegeix_input(f):
 
