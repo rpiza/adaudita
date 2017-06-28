@@ -1,4 +1,4 @@
-#BRANCA EN DESENVOLUPAMENT. SELECCIONA master
+# BRANCA EN DESENVOLUPAMENT. SELECCIONA master
 
 
 # Auditoria d'Active Directory - ADaudita
