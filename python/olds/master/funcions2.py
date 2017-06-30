@@ -1,4 +1,4 @@
-from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad, search_ad_v2
+# from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad, search_ad_v2
 from exports import print_results, export_html, export_json, export_csv, export_pdf, result_open_html
 
 def search_v2(f):
@@ -7,12 +7,12 @@ def search_v2(f):
     adObj = search_ad_v2(f)
 
     c = None
-    while c not in ['p','P', 'W', 'w','' ]:        
+    while c not in ['p','P', 'W', 'w','' ]:
         c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
-    if c in ['p','P']:   
+    if c in ['p','P']:
         print_results(adObj.c.response, adObj.c.response_to_json())
     else:
-        result_open_html(adObj) 
+        result_open_html(adObj)
 
 def enrera_v2(m):
     m.quit()

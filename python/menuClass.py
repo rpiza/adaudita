@@ -1,15 +1,19 @@
 #import funcions as funcions
 #from funcions import print_results
 #from connecta import ad
+from funcionsClass import FuncionsMenus
 
 class Menu():
 
-    def __init__(self, choices="", txt_menu=""): 
+    def __init__(self, nivell= None, adObj = None, exp = None, menus = None):
         # a default value but can also be fed in.
-        self.choices = choices
-        self.txt_menu = txt_menu
-#        self.adObj = adObj
-        self.seguir = True
+        if nivell:
+            self.adObj = adObj
+            self.exp = exp
+            fm = FuncionsMenus(nivell, adObj, exp, [], menus)
+            self.choices = fm.choices
+            self.txt_menu = fm.txt_menu
+            self.seguir = True
 
     def display(self):
         print(self.txt_menu)
@@ -22,7 +26,7 @@ class Menu():
             choice = input("Introdueix una opció: ")
 #            print ('OPCIO: ',self.choices.get(choice))
             if self.choices.get(choice):
-#                print (self.choices.get(choice)[1])
+                # print (self.choices.get(choice)[1])
                 action = self.choices.get(choice)[0]
                 action(self.choices.get(choice)[1])
             else:

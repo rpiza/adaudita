@@ -1,7 +1,8 @@
 from collections import namedtuple
 import menuClass as mc
-from funcions2 import search_v2, enrera_v2
+# from funcions2 import search_v2, enrera_v2
 from time_functions import restar_dies_data_actual, convertir_data
+from adsClasses import uac_and_mask, uac_or_mask
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya ssl")
 Search = namedtuple("Search", "nom base scope attributes filter")
@@ -18,28 +19,32 @@ Camps de llista_informes:
 RECORDA A INTRODUIR UNA COMA ENTRE ELS DIFERENTS INFORMES,SI NO PYTHON GENERA AQUEST ERROR:(TypeError: list indices must be integers or slices, not tuple)
 '''
 llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUBTREE', ['lastlogon','samaccountname', 'whenchanged','whenCreated'],
-                        '(&(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=admin))'],
-                   ["Informe Equip = \'DC1\'", 'DC=problemeszero,DC=com','SUBTREE', attr_basic, 
-                        '(&(objectClass=*)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=DC1))'],
+                        '(&(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=admin))', False],
+                   ["Informe Equip = \'DC1\'", 'DC=problemeszero,DC=com','SUBTREE', attr_basic,
+                        '(&(objectClass=*)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=DC1))', False],
                    ["Llistat d'usuaris que no han canviat la contrasenya fa més de 60 dies", 'DC=problemeszero,DC=com','SUBTREE', \
                         ['samaccountname', 'pwdlastset','whenCreated'],'(&(objectClass=*) \
                         (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(pwdlastset<={f1}))'.format(
-                        f1=restar_dies_data_actual(60)) ],
+                        f1=restar_dies_data_actual(60)), False ],
                    ["Usuaris que pertanyen al grup \'Domain Admins\'", 'DC=problemeszero,DC=com','SUBTREE', \
                         ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated'],'(&(objectClass=*) \
-                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(memberOf=CN=Domain Admins,CN=Users,DC=problemeszero,DC=com))'],
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(memberOf=CN=Domain Admins,CN=Users,DC=problemeszero,DC=com))', False],
                    ["Usuaris amb darrer logon abans de 2016-06-09", 'DC=problemeszero,DC=com','SUBTREE', \
                         ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
                         (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(lastlogon<={f1}))'.format(
-f1=convertir_data(2016,6,9,20,40))]
+                        f1=convertir_data(2016,6,9,20,40)), False],
+                   ["Usuaris no caduca contrasenya", 'DC=problemeszero,DC=com','SUBTREE', \
+                        ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com){f1}{f2})'.format(
+                        f1=uac_and_mask('ADS_UF_DONT_EXPIRE_PASSWD'), f2 = uac_or_mask('ADS_UF_ACCOUNTDISABLE')), False]
                    ]
 
-choices = {}
-menu_txt = """
-===================================================================================================
-         Llista d'informes personalitzats:
-
-"""
+# choices = {}
+# menu_txt = """
+# ===================================================================================================
+#          Llista d'informes personalitzats:
+#
+# """
 
 menus = {'m_reports': None, 'm_personalitzat': None, 'm_atributs': None, 'm_export': None, 'm_informes': None}
 
@@ -54,19 +59,9 @@ def init():
 
 def init2(adObj):
     global menus
-    global choices
-    global menu_txt
 
     for menu in menus.keys():
         menus[menu] = mc.Menu()
     ##Then you can reference them with:
     #menus['m_personalitzat'].temperature()
-
-    i = 1
-    for elem in llista_informes:
-        choices.update({ str(i) : [search_v2, [elem, adObj]]})
-        menu_txt = menu_txt + "    " + str(i) + ". " + elem[0] + "\n"
-        i =  i + 1
-    choices.update({ str(i) : [enrera_v2, menus['m_informes']]})
-    menu_txt = menu_txt + "    " + str(i) + ". Enrera\n"    
-
+    return menus

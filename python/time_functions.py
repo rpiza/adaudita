@@ -1,5 +1,5 @@
 import time
-
+import random, string
 
 def restar_dies_data_actual(dies):
     '''Calcular el valor en nanosegons restant a la data actual el valor de "dies".
@@ -22,6 +22,9 @@ def convertir_UTC_a_local(m):
                m[10:12]), segons=int(m[12:14])), '%Y-%m-%dT%H:%M:%S')))
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(segons - time.timezone + 3600) if time.localtime(
                 segons-time.timezone).tm_isdst else time.localtime(segons-time.timezone))
+
+def random_generator(size = 8, chars = string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for x in range(size))
 
 
 #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((float(m.group(0))/1e7)-11676009600))

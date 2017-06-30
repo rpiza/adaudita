@@ -1,12 +1,12 @@
 #import menuClass as mc
-from connecta import ad, establir_connexio, show_connection, modify_connection, search_ad
+from connecta import ad #, establir_connexio, show_connection, modify_connection, search_ad
 import settings
 from settings import menus
 from exports import print_results, export_html, export_json, export_csv, export_pdf, result_open_html
 
 import sys
 import readline
-'''La funcio del modul readline es manternir history de les comandes executades. 
+'''La funcio del modul readline es manternir history de les comandes executades.
     Amb windows no he conseguit carregar aquest modul.
     Es pot comentar. No afecta al funcionamen del programa'''
 import os
@@ -42,12 +42,12 @@ def search(f):
     adObj = search_ad(f)
 
     c = None
-    while c not in ['p','P', 'W', 'w','' ]:        
+    while c not in ['p','P', 'W', 'w','' ]:
         c = input("Vols veure els resultats al navegador web o per pantalla: [W/p] ")
-    if c in ['p','P']:   
+    if c in ['p','P']:
         print_results(adObj.c.response, adObj.c.response_to_json())
     else:
-        result_open_html(adObj) 
+        result_open_html(adObj)
 
 def llegeix_input(f):
 
@@ -64,13 +64,13 @@ def modifica_param(f):
     export_files[f] = input("Introdueix el nou valor: ")
 
     if not os.path.exists(export_files[f]) and (f == 0):
-        while c not in ['s','S', 'n', 'N','' ]:        
+        while c not in ['s','S', 'n', 'N','' ]:
             c = input("El directori introduit no existeix. El vols crear[s/N]: ")
         if c in ['s','S']: os.makedirs(export_files[f])
 
-    if (export_files[f] not in tipus_ext) and (f == 1): 
+    if (export_files[f] not in tipus_ext) and (f == 1):
         print('Els tipus d\'extensió possibles són:', tipus_ext)
-        while c not in tipus_ext:        
+        while c not in tipus_ext:
             c = input('Tria un tipus de fitxer dels possibles. L\'extensió NO ha de incloure les \': ')
         export_files[f] = c
 
@@ -86,26 +86,26 @@ def result_export(adObj):
         print ('\nEl directori d\'exportació: \'{f1}\', no existeix!!!\nRevisa els paràmetres d\'exportació de fitxers'.format(
             f1=export_files[0]))
         return
-    
+
     #Generam un nom de fitxer aleatori
     nom_f = random_generator()
     nom_f_1 = input("\n\tNom del fitxer [{nom}]: ".format(nom = nom_f))
     if nom_f_1: nom_f = nom_f_1
-    
+
     print('\n\tEl resultat es guardarà a ', export_files[0] + '/' + nom_f + '.' + export_files[1])
-    
+
 #try:
     f = open(export_files[0] + '/' + nom_f + '.' + export_files[1], 'w')
     f.write({'json': export_json,'csv': export_csv,'pdf': export_pdf, 'html': export_html}.get(
         export_files[1])(adObj))
     f.close()
 
-    while c not in ['s','S', 'n', 'N','' ]:        
+    while c not in ['s','S', 'n', 'N','' ]:
         c = input('\n\tVols obrir el fitxer [s/N]: ')
     if c in ['s','S']: webbrowser.open(export_files[0] + '/' + nom_f + '.' + export_files[1])
 
 #except:
-#    print ("Unexpected error:", sys.exc_info()[0]) 
+#    print ("Unexpected error:", sys.exc_info()[0])
 #    return
 
 def intro_atributs(a):
@@ -129,7 +129,7 @@ def quit(adObj):
         adObj.disconnect()
     except AttributeError:
         print("No estaves connectat al Directori Actiu")
-    finally:    
+    finally:
         print("Adéu!!!!")
         sys.exit(0)
 
