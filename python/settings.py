@@ -8,8 +8,8 @@ Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya ssl")
 Search = namedtuple("Search", "nom base scope attributes filter")
 
 '''Hi ha dos grups d'atributs per defecte. Es poden configurar a desig de l'usuari. Despres en temps d'execucio es pot triar quin desl dos grups retornara la cerca o tambe hi ha l'opcio, en temps d'execucio, d'elegir els atributs a retornar'''
-attr_basic = ['cn','memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime', 'whenCreated']
-attr_advanced = ['cn', 'givenname','sn', 'mail', 'admincount', 'memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime']
+attr_basic = ['cn','memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime', 'whenCreated', 'userAccountControl']
+attr_advanced = ['cn', 'givenname','sn', 'mail', 'admincount', 'memberOf','member', 'pwdlastset', 'lastlogon', 'badpasswordtime', 'userAccountControl']
 
 '''Es poden crear els informes personalitzats amb el search_base, atributs i filtre que es vulgui. Aquests informes son creats
 en temps d'excucio.
@@ -18,7 +18,7 @@ Camps de llista_informes:
 [[Nom de l'informe, search_base, scope, atributs a retornar, filtre]]
 RECORDA A INTRODUIR UNA COMA ENTRE ELS DIFERENTS INFORMES,SI NO PYTHON GENERA AQUEST ERROR:(TypeError: list indices must be integers or slices, not tuple)
 '''
-llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUBTREE', ['lastlogon','samaccountname', 'whenchanged','whenCreated'],
+llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUBTREE', ['lastlogon', 'userAccountControl','samaccountname', 'whenchanged','whenCreated'],
                         '(&(objectClass=*)(objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=admin))', False],
                    ["Informe Equip = \'DC1\'", 'DC=problemeszero,DC=com','SUBTREE', attr_basic,
                         '(&(objectClass=*)(objectCategory=CN=Computer,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(CN=DC1))', False],

@@ -1,4 +1,5 @@
 from time_functions import convertir_temps, convertir_UTC_a_local, format_ad_timestamp_localtime, format_time_localtime
+from adsClasses import trobar_flags
 
 custom_formatter = {
 '1.3.6.1.4.1.1466.115.121.1.24': (format_time_localtime, None),  # Generalized time
@@ -12,5 +13,6 @@ custom_formatter = {
 '1.2.840.113556.1.4.96': (format_ad_timestamp_localtime, None),  # pwdLastSet (Microsoft)
 '1.2.840.113556.1.4.159': (format_ad_timestamp_localtime, None),  # accountExpires (Microsoft)
 '1.2.840.113556.1.4.662': (format_ad_timestamp_localtime, None),  # lockoutTime (Microsoft)
-'1.2.840.113556.1.4.1696': (format_ad_timestamp_localtime, None)  # lastLogonTimestamp (Microsoft)
+'1.2.840.113556.1.4.1696': (format_ad_timestamp_localtime, None),  # lastLogonTimestamp (Microsoft)
+'1.2.840.113556.1.4.8': (trobar_flags, None)      # userAccountControl (Microsoft)
 }

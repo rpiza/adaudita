@@ -1,8 +1,8 @@
-from enum import IntEnum
+from enum import IntEnum, unique
 from bitstring import BitArray
 import re
 
-#@unique
+@unique
 class AdsUserFlagEnum(IntEnum):
     # https://support.microsoft.com/ca-es/help/305144/
 
@@ -32,7 +32,7 @@ class AdsUserFlagEnum(IntEnum):
     def get_name(self, value):
         for item in self:
             if (value == item.value):
-                print(item.name)
+                return item.name
 
 
 # (&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.804:=65536))
@@ -45,14 +45,16 @@ def uac_or_mask (nom):
     return '(!(userAccountControl:1.2.840.113556.1.4.803:={f1}))'.format(f1 = AdsUserFlagEnum[nom])
 
 def trobar_flags(raw_value):
+    flags = []
     flag = int(raw_value)
+    flags.append(flag)
     a = BitArray(hex(flag))
     bits = a[::-1].bin
     for m in re.finditer('1', bits):
         #  print (2**m.start())
-        AdsUserFlagEnum.get_name(2**m.start())
+        flags.append(AdsUserFlagEnum.get_name(2**m.start()))
         #  print('1 found', m.start(), m.end())
-
+    return flags
 
 
 
