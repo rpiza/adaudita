@@ -1,4 +1,6 @@
 from enum import IntEnum
+from bitstring import BitArray
+import re
 
 #@unique
 class AdsUserFlagEnum(IntEnum):
@@ -26,6 +28,13 @@ class AdsUserFlagEnum(IntEnum):
     ADS_UF_PASSWORD_EXPIRED                        = 8388608  # 0x800000
     ADS_UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION  = 16777216  # 0x1000000
 
+    @classmethod
+    def get_name(self, value):
+        for item in self:
+            if (value == item.value):
+                print(item.name)
+
+
 # (&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.804:=65536))
 # Nomes usuaris actius (&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))
 
@@ -34,3 +43,43 @@ def uac_and_mask (nom):
 
 def uac_or_mask (nom):
     return '(!(userAccountControl:1.2.840.113556.1.4.803:={f1}))'.format(f1 = AdsUserFlagEnum[nom])
+
+def trobar_flags(raw_value):
+    flag = int(raw_value)
+    a = BitArray(hex(flag))
+    bits = a[::-1].bin
+    for m in re.finditer('1', bits):
+        #  print (2**m.start())
+        AdsUserFlagEnum.get_name(2**m.start())
+        #  print('1 found', m.start(), m.end())
+
+
+
+
+
+# from bitstring import *
+# a = BitArray('0x1af')
+# a = BitArray('512')
+# a = BitArray('0x200')
+# a.uint()
+# a.uint
+# a.bin
+# a[2].bin
+# a[2:6].bin
+# a[1:6].bin
+# a[1:6:5].bin
+# a[1:6:2].bin
+# a[1:6:-1].bin
+# a[11:0:-1].bin
+# a = BitArray('0x400')
+# a.uint
+# a[11:0:-1].bin
+# a.bin
+# a[0:1].bin
+# a = BitArray('0x40')
+# u.bin
+# a.bin
+# a = BitArray('0x42')
+# a.bin
+# a = BitArray('0x10000')
+# a.bin

@@ -19,6 +19,7 @@ class Exports():
         self.amplada_col = amplada_col
         self.separador = separador
         self.export_files = export_files
+
     def print_results(self, llista):
         ''' Imprimiex el resultat de la consulta ldap per pantalla
         La variable amplada_col marca l'amplada de les columnes. Si es retornen massa atributs, els resultats
@@ -27,10 +28,12 @@ class Exports():
         print(taula)
 
     def export_json(self,json):
-        return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, json, count=0, flags=0)
+        return json
+        #return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, json, count=0, flags=0)
 
     def export_csv(self,llista):
-        return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, self.results(llista), count=0, flags=0)
+        return self.results(llista)
+        # return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, self.results(llista), count=0, flags=0)
         #return results(adObj.c.response)
 
     def export_pdf(self):
@@ -39,7 +42,8 @@ class Exports():
     def export_html(self, j):
         html = '<html><head></head><h1>Titol de l informe</h1><body>' + json2html.convert(
             json = j).replace('<th>entries</th>','') + '</body></html>'
-        return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, html, count=0, flags=0)
+        return html
+        #return re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca, html, count=0, flags=0)
 
     def result_open_html(self,json):
         '''Obri el resultats de la darrera consulta a l'aplicacio html'''
@@ -91,10 +95,12 @@ class Exports():
                 if elem.get('attributes') and atribut != 'dn':
                     if elem.get('attributes').get(atribut):
                         if isinstance(elem.get('attributes').get(atribut),list):
-                            linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca,str(
-                                        elem.get('attributes').get(atribut)).replace("\', \'", "; ")[2:-2], count=0, flags=0))
-                        else: linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca,str(
-                                        elem.get('attributes').get(atribut)), count=0, flags=0))
+                            linia.append(str(elem.get('attributes').get(atribut)).replace("\', \'", "; ")[2:-2])
+                            # linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca,str(
+                            #             elem.get('attributes').get(atribut)).replace("\', \'", "; ")[2:-2], count=0, flags=0))
+                        else: linia.append(str(elem.get('attributes').get(atribut)))
+                        # else: linia.append(re.sub(r'\d{14}.\d{,3}Z|\d{18}', self.convertir_cerca,str(
+                        #                 elem.get('attributes').get(atribut)), count=0, flags=0))
                     else : linia.append('')
             if linia: contingut.append(linia)
         return contingut

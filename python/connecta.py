@@ -1,3 +1,4 @@
+from formatters import custom_formatter
 import settings
 from ldap3 import Server, \
     Connection, \
@@ -13,7 +14,7 @@ class ConnectaAD():
     c = None
     resposta = []
 
-    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r', ssl = 'False', fc = None):
+    def __init__(self, host='localhost', port=389, u='administrator', pwd='Adm1n1strat0r', ssl = 'False', fc = None, formatter=custom_formatter):
         #this is the constructor that takes in host and port. retryAttempts is given
         # a default value but can also be fed in.
         self.host = host
@@ -22,11 +23,12 @@ class ConnectaAD():
         self.pwd = pwd
         self.ssl = ssl
         self.filtre_consola = fc
+        self.custom_formatter = formatter
 
     def connect(self):
         '''Connecta amb el directori actiu definit.'''
 
-        self.c = Connection(Server(self.host, port=self.port, use_ssl=self.ssl),
+        self.c = Connection(Server(self.host, port=self.port, use_ssl=self.ssl, formatter=self.custom_formatter),
             auto_bind=AUTO_BIND_NO_TLS,
             read_only=True,
             check_names=True,
