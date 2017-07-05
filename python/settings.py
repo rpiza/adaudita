@@ -1,7 +1,7 @@
 from collections import namedtuple
 import menuClass as mc
 # from funcions2 import search_v2, enrera_v2
-from time_functions import restar_dies_data_actual, convertir_data
+from time_functions import restar_dies_data_actual, convertir_data, restar_dies_data_actual_ISO, convertir_data_ISO
 from adsClasses import uac_and_mask, uac_or_mask
 
 Dades_DC = namedtuple("Dades_DC", "nom host port usuari contrasenya ssl")
@@ -33,6 +33,14 @@ llista_informes = [["Informe Usuari = \'admin\'", 'DC=problemeszero,DC=com','SUB
                         ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
                         (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(lastlogon<={f1}))'.format(
                         f1=convertir_data(2016,6,9,20,40)), False],
+                   ["Usuaris creats despres de 2017-01-01", 'DC=problemeszero,DC=com','SUBTREE', \
+                        ['cn', 'givenname', 'sn','userAccountControl', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(whenCreated>={f1}))'.format(
+                        f1=convertir_data_ISO('2017','01','01')), False],
+                   ["Usuaris modificats fa mes de 30 dies", 'DC=problemeszero,DC=com','SUBTREE', \
+                        ['cn', 'givenname', 'sn','userAccountControl', 'memberOf','whenChanged','whenCreated','lastlogon'],'(&(objectClass=*) \
+                        (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com)(whenChanged<={f1}))'.format(
+                        f1=restar_dies_data_actual_ISO(60)), False],
                    ["Usuaris no caduca contrasenya", 'DC=problemeszero,DC=com','SUBTREE', \
                         ['cn', 'givenname', 'sn','samaccountname', 'memberOf','whenCreated','lastlogon'],'(&(objectClass=*) \
                         (objectCategory=CN=Person,CN=Schema,CN=Configuration,DC=problemeszero,DC=com){f1}{f2})'.format(
