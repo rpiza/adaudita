@@ -24,8 +24,9 @@ class Exports():
         ''' Imprimiex el resultat de la consulta ldap per pantalla
         La variable amplada_col marca l'amplada de les columnes. Si es retornen massa atributs, els resultats
         es superposen i no es veu correctament'''
-        taula = Taula(self.results_2(llista), self.amplada_col, True, "|", "-")
-        print(taula)
+        if llista != -1:
+            taula = Taula(self.results_2(llista), self.amplada_col, True, "|", "-")
+            print(taula)
 
     def export_json(self,json):
         return json
@@ -48,10 +49,11 @@ class Exports():
     def result_open_html(self,json):
         '''Obri el resultats de la darrera consulta a l'aplicacio html'''
         try:
-            fp = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
-            fp.write(str.encode(self.export_html(json)))
-            fp.seek(0)
-            webbrowser.open(fp.name)
+            if json != -1:
+                fp = tempfile.NamedTemporaryFile(suffix='.html', delete=False)
+                fp.write(str.encode(self.export_html(json)))
+                fp.seek(0)
+                webbrowser.open(fp.name)
         except:
             print ("Unexpected error:", sys.exc_info()[0])
             return

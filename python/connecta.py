@@ -117,10 +117,16 @@ class ConnectaAD():
             return self.c.response if f[1] == "llista" else self.c.response_to_json()
         except ldap3.core.exceptions.LDAPInvalidFilterError:
             print("\nEi!!!! Hi ha un error en el filtre!!!")
-            return
+            return -1
+        except ldap3.core.exceptions.LDAPSocketSendError:
+            print("\nEi!!!!T'has desconnectat del DC!!!\nTorna a establir la connexió")
+            return -1
+        except ldap3.core.exceptions.LDAPSocketOpenError:
+            print("\nEi!!!!T'has desconnectat del DC!!!\nTorna a establir la connexió")
+            return -1
         except AttributeError:
             print("\nEi!!!! Comprova que has establert la connexió al DC!!!")
-            return
+            return -1
 
 
 ad = ConnectaAD()
