@@ -17,6 +17,11 @@ def convertir_temps(m):
     '''Convertiex la valor de temps de windows amb un string en format %Y-%m-%d %H:%M:%S. El valor m esta representat en UTC.'''
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((float(m)/1e7)-11644473600))
 
+def restar_dies_data_actual_ISO(dies):
+    '''Calcular el valor en format ISO restant a la data actual el valor de "dies".
+    Representa la data en valor UTC'''
+    return datetime.utcfromtimestamp(time.time()- dies*86400).strftime('%Y%m%d%H%M%S.0Z')
+
 def convertir_data(yyyy,m,d,H=0,M=0,S=0):
     '''Convertiex data amb format '%Y-%m-%dT%H:%M:%S' a valor de temps windows'''
     return int((time.mktime(time.strptime('{anyo}-{mes}-{dia}T{hora}:{minuts}:{segons}'.format(
