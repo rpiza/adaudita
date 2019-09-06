@@ -13,7 +13,7 @@ def main():
     ad.__init__(settings.dc.host, settings.dc.port, settings.dc.usuari, settings.dc.contrasenya, settings.dc.ssl)
     e = Exports()
     #Inicialitzam els parametres de l'aplicacio que necessiten l'objecte de connexio al directori actiu
-    llista_menus = settings.init2(ad)
+    llista_menus = settings.init_menus(ad)
 
     #Establim la connexio al ldap
     print("\n")
